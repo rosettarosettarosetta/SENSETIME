@@ -58,23 +58,25 @@ class IncrementalDBSCAN:
 
 
 
-    def set_data(self, message):
-        """
-        After the connection with the RabbitMQ is complete a message is received.
-        This function is used to gather the message from the consumer. It appends the newly arrived data to the
-        dataset used for clustering.
-        :param message:  The message consumed by the RabbitMQ. Should be a 3-column, comma-separated text.
-        """
-        # store the collected message to a temp dataframe
-        #temp = pd.read_csv(io.StringIO(message), sep=',', header=None)
-        #temp.columns = ['Temperature', 'Gas', 'Relative Humidity']
-        # append the temp to the dataset
+    def set_data_oneline(self, message): #写入最后一行
         data_frame=pd.read_csv(message,sep=',',header=None)
         data_frame.columns=['Temperature', 'Gas', 'Relative Humidity']
         last_row = data_frame.iloc[-1] 
         self.dataset = self.dataset.append(last_row, ignore_index=True)
 
-        
+    def set_data_all(self, message):
+        data_frame=pd.read_csv(message,sep=',',header=None)
+        data_frame.columns=['Temperature', 'Gas', 'Relative Humidity']
+        #print(data_frame)
+        self.dataset = self.dataset.append(data_frame, ignore_index=True)
+
+    def set_data_show (self, message,view_line):
+        data_frame=pd.read_csv(message,sep=',',header=None)
+        num_rows = len(data_frame)
+        #print('data_frame行数'+str(num_rows))
+        data_frame.columns=['Temperature', 'Gas', 'Relative Humidity']
+        view_row = data_frame.iloc[view_line] 
+        self.dataset = self.dataset.append(view_row, ignore_index=True)
 
     def print_final_dataset(self):
         print(self.final_dataset.values)

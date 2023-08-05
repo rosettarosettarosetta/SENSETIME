@@ -30,7 +30,7 @@ from DBSCAN import IncrementalDBSCAN
 import csv
 import datetime
 import pandas as pd
-from sense.about_csv import truncate_csv ,clean_final_dataset
+from about_csv import truncate_csv ,clean_final_dataset
 from show import show_3d
 
 # 检查数据是否合法
@@ -51,7 +51,7 @@ sensor=EnvironmentalSensor()
 temperature = gas = relative_humidity = pressure = altitude = 0
 dbscan = IncrementalDBSCAN()
 show_3D=show_3d()
-
+show_scene=0 #展示场景,默认为否
 
 #script_path = os.path.dirname(__file__)
 #filename = os.path.join(script_path, 'sensor_data.csv')
@@ -73,7 +73,7 @@ if total_rows != 0:
   user_input = input().lower()  # 将用户输入转换为小写字母，以便不区分大小写
   if user_input == 'y'or user_input == '':
     print("调用数据中")
-    dbscan.set_data(filename)
+    #dbscan.set_data(filename)
     # 在这里执行重置数据的操作
         
   elif user_input == 'n':
@@ -83,11 +83,36 @@ if total_rows != 0:
     total_rows=-1
     print("重置完成")
         
+if total_rows != -1 :
+  print("是否为复盘场景 [y]/[n]")
+  user_input = input().lower()
+  if user_input == 'y'or user_input == '':
+    show_scene=1
+    view_line =0
+  elif user_input == 'n':  #全部并入数据
+    show_scene=2
+
+
 
 
 # 打开 CSV 文件并创建 csv.writer 对象
 with open(filename, 'a', newline='') as csvfile:
   csvwriter = csv.writer(csvfile)
+
+  while(show_scene==1) :
+    dbscan.set_data_show(filename,view_line)
+    print("读取数据到：")
+    print(view_line)
+    if(view_line==(total_rows-1)):
+      show_scene=0
+    dbscan.batch_dbscan()
+    
+    show_3D.batch_dbscan_3d(dbscan)
+    dbscan.print_final_dataset
+    print(dbscan.final_dataset.values)
+    view_line=view_line+1
+    
+
   while True:
     
     # 模拟从传感器读取的数据
@@ -105,14 +130,43 @@ with open(filename, 'a', newline='') as csvfile:
     #timestamp = datetime.datetime.now()
     # 将数据写入 CSV 文件
   
-    print(total_rows )
-    csvwriter.writerow([temperature, pressure, relative_humidity])#
+    print(total_rows)
+    csvwriter.writerow([temperature, pressure, relative_humidity])
     csvfile.flush() 
     
-     
-    #if total_rows < 20 and total_rows>0:
-    if total_rows < 40 :
-      dbscan.set_data(filename)
+
+    if(show_scene==0) :
+      dbscan.set_data_oneline(filename)
+    if(show_scene==2) :
+      dbscan.set_data_all(filename)
+      show_scene=0
+      
+        
+    dbscan.batch_dbscan()
+      
+    show_3D.batch_dbscan_3d(dbscan)
+      #clean_final_dataset()
+      #csvfile.flush() 
+    dbscan.print_final_dataset
+    print(dbscan.final_dataset.values)
+    #if total_rows>=40:
+    #dbscan.set_data_oneline(filename)
+    #dbscan.incremental_dbscan_()
+      #dbscan.add_dataset(temperature, pressure, relative_humidity)#
+    csvfile.flush() 
+    #time.sleep(3)
+
+
+'''
+
+if total_rows < 40 :
+      if(show_scene==0) :
+        dbscan.set_data_oneline(filename)
+      if(show_scene==2) :
+        dbscan.set_data_all(filename)
+        show_scene=0
+      
+        
       dbscan.batch_dbscan()
       
       show_3D.batch_dbscan_3d(dbscan)
@@ -121,8 +175,10 @@ with open(filename, 'a', newline='') as csvfile:
       dbscan.print_final_dataset
       print(dbscan.final_dataset.values)
     if total_rows>=40:
-      dbscan.set_data(filename)
+      dbscan.set_data_oneline(filename)
       dbscan.incremental_dbscan_()
       #dbscan.add_dataset(temperature, pressure, relative_humidity)#
     csvfile.flush() 
     #time.sleep(3)
+
+'''
