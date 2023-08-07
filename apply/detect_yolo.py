@@ -1,36 +1,15 @@
+from se_openhw.kit.nano import PTCamera
+import se_openhw.platform as platform
 import cv2
 import numpy as np
 import onnxruntime
 import time
-from se_openhw.kit.nano import PTCamera
-import se_openhw.platform as platform
 import threading
 
+
+Ptc =PTCamera()
 CLASSES=["fire"]
 
-ptc =PTCamera()
-
-def rotate_clockwise():
-    global ptc
-    for i in range(-90, 90):
-        ptc.set_pitch(35)
-        ptc.set_yaw(i)
-        time.sleep(0.1)
-
-# 逆时针转动180度
-def rotate_counterclockwise():
-    global ptc
-    for i in range(-90, 90) :
-        yaw_angle = -i  
-        print(yaw_angle)
-        ptc.set_pitch(35)
-        ptc.set_yaw(-i)
-        time.sleep(0.1)
-
-def turn():
-    while True:
-        rotate_clockwise()#-90 到90
-        rotate_counterclockwise() #90 到 -90
 
 class YOLOV5():
     def __init__(self,onnxpath):
@@ -180,20 +159,19 @@ def draw(image,box_data):  #画框
         
 
 if __name__=="__main__":
-    onnx_path='fire.onnx'
+    onnx_path=r'/home/senseedu/sensetime/apply/fire.onnx'
     conf_thres = 0.5  # 检测的置信度阈值
     iou_thres = 0.5  # NMS的IoU阈值
     # 实例化类
-    cap = cv2.VideoCapture(3)
     model=YOLOV5(onnx_path)
     #保存视频
     #fource=cv2.VideoWriter_fourcc(*'DIVX')
     #resulte=cv2.VideoWriter('result_new2.avi',fource,30.0,(int(cap.get(3)), int(cap.get(4))))
-    t = threading.Thread(target=turn, args=()) 
-    t.start()
+    #t = threading.Thread(target=turn, args=()) 
+    #t.start()
 
     while 1:
-        frame = ptc.get_frame()   #读取视频帧
+        frame = Ptc.get_frame()   #读取视频帧
         if not frame.any():
             break
         else:
@@ -215,7 +193,7 @@ if __name__=="__main__":
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
     flag=False
-    cap.release()
     cv2.destroyAllWindows()
+
 
 
