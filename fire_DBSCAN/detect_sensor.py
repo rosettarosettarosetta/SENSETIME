@@ -63,8 +63,6 @@ else:
 clean_final_dataset()
 
 
-
-
 total_rows = count_csv_rows(filename)
 
 if total_rows != 0:
