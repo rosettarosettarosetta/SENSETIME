@@ -64,5 +64,5 @@ class show_3d ():
         plt.draw()  # 添加图例
             # 暂停一小段时间，使图形得以更新
                 #aplt.show()
-        plt.pause(3)  
+        plt.pause(10)  
         self.ax.clear()  # 清空之前绘画的点
